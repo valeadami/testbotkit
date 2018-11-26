@@ -1,0 +1,16 @@
+{
+  "name": "testbotkit",
+  "version": "1.0.0",
+  "description": "test webhook con express",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "va",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "botkit": "^0.6.21",
+    "express": "^4.16.4"
+  }
+}
