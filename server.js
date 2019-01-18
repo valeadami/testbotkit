@@ -1,5 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
+//aggiunto in data 18/01/2019
+var hbs = require('express-hbs');
 
 module.exports = function(controller) {
 
@@ -7,6 +9,10 @@ module.exports = function(controller) {
     // Parse request bodies
     webserver.use(bodyParser.json());
     webserver.use(bodyParser.urlencoded({ extended: true }));
+
+    webserver.engine('hbs', hbs.express4({partialsDir: __dirname + '/../views/partials'}));
+    webserver.set('view engine', 'hbs');
+    webserver.set('views', __dirname + '/../views/');
     // Setup a static directory 'public', totally optional
     webserver.use(express.static('public'));
 

@@ -2,9 +2,9 @@ var Botkit = require('botkit');
 
 // Create the Botkit controller, which controls all instances of the bot.
 var controller = Botkit.anywhere({
-    debug: false,
+    debug: true,
     replyWithTyping: true,
-    studio_token: process.env.studio_token,
+    studio_token: '2Le3K87SizoroDgZh96t7j6l6hT1goTbadoPEacFuYenKBxQvprdOeNG0HWl92fx',//process.env.studio_token,
     typingDelayFactor: 1.3
    /*verify_token: process.env.verify_token,
     access_token: process.env.page_token,*/
@@ -15,10 +15,19 @@ var controller = Botkit.anywhere({
 var webserver = require('./server.js')(controller);
 
 // Wildcard hears response, will respond to all user input with 'Hello World!'
-controller.hears('(.*)', 'message_received', function(bot, message) { //'(.*)'
-  bot.reply(message, 'ciao, hai chiesto ' + );
-})
+controller.hears(['hello world'], 'message_received', function(bot,message) {
 
+  // start a conversation to handle this response.
+
+  bot.startConversation(message, function(err,convo) {
+
+    convo.ask('How are you?')
+ });
+  });   
 controller.hears('porco', 'message_received', function(bot, message) { //'(.*)'
-  bot.reply(message, 'dio') ;
-})
+  console.log('sono qui in porco...')
+bot.reply(message, 'dio') ;
+});
+controller.hears('(.*)', 'message_received', function(bot, message) { //'(.*)'
+  bot.reply(message, 'ciao' );
+});

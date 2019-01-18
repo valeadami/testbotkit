@@ -3,7 +3,7 @@ module.exports = function(webserver, controller) {
     webserver.post('/botkit/receive', function(req, res) {
         // respond to FB that the webhook has been received.
        // res.status(200);
-        //res.send('ok');
+       // res.send('ok dal post');
 
         var bot = controller.spawn({});
 
