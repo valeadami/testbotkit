@@ -1,8 +1,9 @@
 module.exports = function(controller) {
 
     controller.hears('libretto','message_received', function(bot, message) {
-  
+        console.log('DALLA SKILL LIBRETTO');
       bot.reply(message, {
+          
           text: 'Sono nel libretto!',
           quick_replies: [
               {

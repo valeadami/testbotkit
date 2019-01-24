@@ -3,14 +3,15 @@
 
     var Botkit = {
       config: {
-        //ws_url: (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host,
-        ws_url:'http://localhost:3000/botkit/receive',
+        ws_url: (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host,
+       //18/01/2019 con webhook
+       // ws_url:'http://localhost:3000/botkit/receive',
         reconnect_timeout: 3000,
         max_reconnect: 5
       },
       options: {
         sound: false,
-        use_sockets: false //true
+        use_sockets: true //true --> false se webhook
       },
       reconnect_count: 0,
       guid: null,
