@@ -26,7 +26,5 @@ var Conversation={
         'questPrenPassword':'qual’è la tua password? In genere è composta da otto caratteri alfanumerici, ad esempio Q3VRAAQP',
         'questLogout':'Vuoi uscire?'
     }
-
-
 }
 module.exports=Conversation;

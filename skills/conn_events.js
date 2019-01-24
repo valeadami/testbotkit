@@ -173,7 +173,7 @@ module.exports = function(controller) {
                 {
                     pattern:'si',
                     callback: function(response, convo) {
-                        convo.say('Arrivederci! dal thread ');
+                        convo.say('Arrivederci! dal thread '); 
                         convo.next();
                      
                     }

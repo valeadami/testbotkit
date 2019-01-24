@@ -1,5 +1,5 @@
 var http = require("https");
-var studente=require('./clsStudente.js');
+var studente=require('./clsStudente.js'); 
 var carriera=require('./clsCarriera.js');
 var rigaLibretto=require('./clsRigaLibretto.js');
 var request = require("request");
@@ -29,7 +29,7 @@ function getEsseTreLogin(){
             },
         json: true 
     }
-   
+
     request(options, function (error, response, body) {
         if (error) {
             reject(error);
@@ -44,7 +44,6 @@ function getEsseTreLogin(){
     });
 
 });
-
 }
 function doLogin(){
     return new Promise(function(resolve, reject) {

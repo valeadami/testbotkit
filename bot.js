@@ -1,5 +1,6 @@
 var Botkit = require('botkit');
 var myConvo=require('./Conversation');
+
 //************************** gestione classi */
 var ctrlEsseTre=require('./Classi/clsControllerS3.js');
 var studente=require('./Classi/clsStudente.js');
