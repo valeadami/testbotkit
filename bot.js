@@ -41,6 +41,7 @@ var webserver = require('./server.js')(controller);
   var skStop=require("./skills/skill_stop.js")(controller);
   var skAnagrafica=require("./skills/skill_anagrafica.js")(controller);
   var skACarriera=require("./skills/skill_carriera.js")(controller);
+  var skAppelliPrenotabili=require("./skills/skill_prenotazione.js")(controller);
   //********fine 18/01/2019 */
   controller.on('conversationStarted', function(bot, convo) {
     console.log('----------------> A conversation started with ', convo.context.user);
@@ -198,3 +199,196 @@ convo.on('end', function (convo) {
 });
 
 });
+//getSingoloEsame
+controller.hears(['getSingoloEsame'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+
+  var replyText = '';
+  bot.startConversation(message, function (err, convo) {
+
+    convo.addMessage({ text: ' qui ho sentito il nome di un esame ' }, 'default'); //default
+
+
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+      // if (message.entities.libretto){
+      console.log('mi connetto a essetre per SINGOLO ESAME');
+      ctrlEsseTre.getEsame('286879','5057980').then((esame) => { //'286879','5057980'
+        replyText += '**************** dati del SINGOLO ESAME ****************** \n';
+
+        replyText += 'esame di ' + esame.adDes +', anno  ' + esame.aaFreqId + 'adsceId ' + esame.adsceId + ' data frequenza ' + esame.dataFreq ;//+ ', esito ' + esame.esito.dataEsa;
+
+        replyText += '\n ' + myConvo.botQuestions.questMenuGenerico;
+        bot.reply(message, replyText);
+       // console.log('ho la singolo esame di ' + esame.adDes);
+      });
+    });
+
+  });
+})
+
+//getAppelliPrenotabili: non serve intent qui...??
+controller.hears('Appelli prenotabili', 'message_received', function(bot, message) {
+
+  var replyText = '';
+  bot.startConversation(message, function (err, convo) {
+
+    convo.addMessage({ text: ' questi sono gli appelli prenotabili' }, 'default'); //default
+
+
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+      // if (message.entities.libretto){
+      console.log('mi connetto a essetre per ELENCO ESAMI PRENOTABILI ');
+      ctrlEsseTre.getPrenotazioni('286879').then((prenotazioni) => { 
+       
+        if (Array.isArray(prenotazioni)){
+        
+          for(var i=0; i<prenotazioni.length; i++){
+  
+            replyText+=   prenotazioni[i].adDes+ '\n ' ;
+            }
+            replyText+='\n Quale appello vuoi prenotare ora?';
+            bot.reply(message, replyText);  
+          
+         }
+      
+      });
+    });
+
+  });
+})
+// ottieni elenco appelli prenotati
+controller.hears('Appelli prenotati', 'message_received', function(bot, message) {
+
+  var replyText = '';
+  bot.startConversation(message, function (err, convo) {
+
+    convo.addMessage({ text: ' questi sono gli appelli prenotati' }, 'default'); //default
+
+
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+      // if (message.entities.libretto){
+      console.log('mi connetto a essetre per ELENCO ESAMI PRENOTATI ');
+      ctrlEsseTre.getPrenotati('286879').then((prenotazioni) => { 
+       
+        if (Array.isArray(prenotazioni)){
+        
+          for(var i=0; i<prenotazioni.length; i++){
+  
+            replyText+=   prenotazioni[i].adDes+ '\n ' ;
+            }
+            replyText+='\n Cosa vuoi fare ora?';
+            bot.reply(message, replyText);  
+          
+         }
+      
+      });
+    });
+
+  });
+})
+//POST PRENOTAZIONE
+controller.hears(['prenotazione'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+  
+  var replyText = '';
+  bot.startConversation(message, function (err, convo) {
+  
+    convo.addMessage({ text: ' queste sono le date disponibili per appello selezionato ' }, 'default'); //default
+    ctrlEsseTre.getAppelloDaPrenotare(10094,117740).then((appelliDaPrenotare) => { //'286879','5057980'
+    replyText += '**************** dati del SINGOLO APPELLO  ****************** \n';
+    if (Array.isArray(appelliDaPrenotare)) {
+      for(var i=0; i<appelliDaPrenotare.length; i++){
+        replyText += ' data appello  ' + appelliDaPrenotare[i].dataInizioApp;//+ ', esito ' + esame.esito.dataEsa;
+      }
+    }
+    replyText += '\n' + message.fulfillment.text; //ok procedo confermi? da DF
+    bot.reply(message, replyText);
+
+   
+  
+    });
+    
+   
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+       
+    });
+
+  });
+})
+//hears confermo...parte il post
+
+//POST PRENOTAZIONE
+controller.hears(['prenotazione - yes'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+  console.log('********* PRENOTAZIONE YES HERE*********');
+  //console.log(JSON.stringify(message));
+  var replyText = message.fulfillment.text;
+  bot.reply(message, replyText);
+  //faccio il post
+  ctrlEsseTre.postSingoloAppelloDaPrenotare(10094,117740,5,5057981).then((res)=>{
+    if (res){
+
+      console.log('ok con la prenotazione dal bot.js');
+      bot.reply(message,' OK DONE');
+    } else {
+      console.log('Nok con la prenotazione dal bot.js');
+      bot.reply(message,' SCUSA HO UN ERRORE');
+    }
+
+  });
+  
+ 
+ 
+})
+//ELIMINARE LA PRENOTAZIONE
+controller.hears('Eliminare appello prenotato', 'message_received', function(bot, message) {
+
+  var replyText = '';
+  bot.reply(message, 'ok procedo con cancellare la prenotazione...');
+  //deleteSingoloAppelloDaPrenotare
+  ctrlEsseTre.deleteSingoloAppelloDaPrenotare(10094,117740,5,236437).then((res)=>{
+    if (res){
+
+      console.log('ok con cancellazione dal bot.js');
+      bot.reply(message,' OK CANCELLATO PRENOTAZIONE');
+    } else {
+      console.log('Nok con la prenotazione dal bot.js');
+      bot.reply(message,' SCUSA HO UN ERRORE CANCALLANDO LA PRENOTAZIONE');
+    }
+
+  });
+  
+  /*
+  bot.startConversation(message, function (err, convo) {
+
+    convo.addMessage({ text: ' queste sono gle prenotazioni che hai fatto' }, 'default'); //default
+
+
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+      // if (message.entities.libretto){
+      console.log('mi connetto a essetre per ELENCO ESAMI PRENOTABILI ');
+      ctrlEsseTre.getPrenotazioni('286879').then((prenotazioni) => { 
+       
+        if (Array.isArray(prenotazioni)){
+        
+          for(var i=0; i<prenotazioni.length; i++){
+  
+            replyText+=   prenotazioni[i].adDes+ '\n ' ;
+            }
+            replyText+='\n Quale appello vuoi prenotare ora?';
+            bot.reply(message, replyText);  
+          
+         }
+      
+      });
+    });
+
+  });*/
+})
