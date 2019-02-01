@@ -62,9 +62,9 @@ controller.hears(['hello world'], 'message_received', function(bot,message) {
     convo.ask('How are you? {{responses.foo}} '); //{{vars.foo}} 
  });
   });   
-controller.hears('porco', 'message_received', function(bot, message) { //'(.*)'
-  console.log('sono qui in porco...')
-bot.reply(message, 'dio ');
+controller.hears('pippo', 'message_received', function(bot, message) { //'(.*)'
+  console.log('sono qui  ')
+bot.reply(message, 'pluto ');
 });
 /*controller.hears('(.*)', 'message_received', function(bot, message) { //'(.*)'
   bot.reply(message, 'ciao' );
