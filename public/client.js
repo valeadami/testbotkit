@@ -3,9 +3,9 @@
 
     var Botkit = {
       config: {
-        ws_url: (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host,
+       ws_url: (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host,
        //18/01/2019 con webhook
-       // ws_url:'http://localhost:3000/botkit/receive',
+       // ws_url:'http://localhost:3000/botkit/receive'
         reconnect_timeout: 3000,
         max_reconnect: 5
       },
@@ -297,6 +297,7 @@
         d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
         var expires = "expires=" + d.toUTCString();
         document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        console.log('expires '+ expires + ' cookie '+ document.cookie);
       },
       getCookie: function(cname) {
         var name = cname + "=";

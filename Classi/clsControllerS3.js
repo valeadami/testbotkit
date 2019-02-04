@@ -89,7 +89,7 @@ function doLogout(){
             studente=undefined;
         }else {
 
-            //LOGIN FAILED
+            //LOGout FAILED
             console.log('response.statusCode ' + response.statusCode);
             console.log('logout failed');
         }
