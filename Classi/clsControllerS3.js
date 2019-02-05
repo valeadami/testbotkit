@@ -12,7 +12,7 @@ var strUrlLogout='https://units.esse3.pp.cineca.it/e3rest/api/logout'
 //anagrafica utente homepage dopo login ->carriere(userId)
 var strUrlAnagraficaHome='https://units.esse3.pp.cineca.it/e3rest/api/anagrafica-service-v1/carriere/'; //s260856/
 //scelgo link libretto
-var strUrlGetLibretto="https://units.esse3.pp.cineca.it/e3rest/api/libretto-service-v1/libretti/286879/righe/"; //?filter=adDes%3D%3D'DIRITTO%20COSTITUZIONALE'
+var strUrlGetLibretto="https://units.esse3.pp.cineca.it/e3rest/api/libretto-service-v1/libretti/"; //   /286879/righe/       /?filter=adDes%3D%3D'DIRITTO%20COSTITUZIONALE'
 //per recuperare esami prenotabili vado sul libretto
 var strUrlGetSingoloEsame='https://units.esse3.pp.cineca.it/e3rest/api/libretto-service-v1/libretti/'; // 286879/5057980  matId=286879  adsceId=5057980
 //var strUrlAppelliPrenotabili='https://units.esse3.pp.cineca.it/e3rest/api/libretto-service-v1/libretti/' ;// 286879/righe/?filter=numAppelliPrenotabili%3D%3D1';
@@ -88,7 +88,7 @@ function doLogout(){
             studente=undefined;
         }else {
 
-            //LOGIN FAILED
+            //LOGout FAILED
             console.log('response.statusCode ' + response.statusCode);
             console.log('logout failed');
         }
@@ -127,11 +127,11 @@ return new Promise(function(resolve, reject) {
 }
 
 //********LIBRETTO */
-function getEsseTreLibretto(){
+function getEsseTreLibretto(matId){
     return new Promise(function(resolve, reject) {
     var options = { 
         method: 'GET',
-        url: strUrlGetLibretto,
+        url: strUrlGetLibretto + matId +"/righe",
         headers: 
             { 
                 'cache-control': 'no-cache',
@@ -242,12 +242,12 @@ function getCarriera(userid){
 
 //ottieni il libretto-> piano di studi
 //modificata il 15/01/2019 tolto idMat
-function getLibretto(){
+function getLibretto(matId){
     return new Promise(function(resolve, reject) {
     //array che contiene le righe del libretto
     var libretto=[];
     var rawData='';
-    getEsseTreLibretto().then((body)=>{
+    getEsseTreLibretto(matId).then((body)=>{
             //controllo che body sia un array
             if (Array.isArray(body)){
                 rawData=JSON.stringify(body);
@@ -255,8 +255,8 @@ function getLibretto(){
                 //creo oggetto libretto
                 for(var i=0; i<body.length; i++){
 
-                    libretto[i]= new rigaLibretto(body[i].aaFreqId,body[i].adCod, 
-                        body[i].adDes,body[i].adsceId, body[i].annoCorso, 
+                    libretto[i]= new rigaLibretto(body[i].aaFreqId,body[i].adCod,
+                        body[i].adDes,body[i].adsceId, body[i].annoCorso, body[i].chiaveADContestualizzata,
                         body[i].dataFreq,body[i].dataScadIscr,body[i].esito);
 
                         libretto[i].log();

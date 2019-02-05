@@ -4,7 +4,7 @@ module.exports = function(webserver, controller) {
         // respond to FB that the webhook has been received.
        // res.status(200);
        // res.send('ok dal post');
-
+       // console.log('session id '+req.session.id);
         var bot = controller.spawn({});
 
         // Now, pass the webhook into be processed

@@ -4,6 +4,10 @@ var myConvo=require('./Conversation');
 var ctrlEsseTre=require('./Classi/clsControllerS3.js');
 var studente=require('./Classi/clsStudente.js');
 var carrieraStudente=require('./Classi/clsCarriera.js');
+var sessione=require('./Classi/clsSessione.js');
+/*const env = require('node-env-file');
+env(__dirname + '/.env');*/
+var sess;
 
 // Create the Botkit controller, which controls all instances of the bot.
 var controller = Botkit.anywhere({
@@ -14,8 +18,11 @@ var controller = Botkit.anywhere({
    /*verify_token: process.env.verify_token,
     access_token: process.env.page_token,*/
 });
-
+//05/02/2019
+controller.session = {};
 /**** DIALOGFLOW  */
+
+
 const dialogflowMiddleware = require('botkit-middleware-dialogflow')({
   keyFilename: './botkit-test-43930ebfe242.json',  // service account private key file from Google Cloud Console PER QUESTO PC
 
@@ -26,6 +33,7 @@ controller.middleware.receive.use(dialogflowMiddleware.receive);
 // We are passing the controller object into our express server module
 // so we can extend it and process incoming message payloads 
 var webserver = require('./server.js')(controller);
+
   //18/01/2019 apro il socket
   controller.openSocketServer(controller.httpserver);
 
@@ -33,6 +41,7 @@ var webserver = require('./server.js')(controller);
   controller.startTicking();
 
   var skConnEvent=require("./skills/conn_events.js")(controller);
+  //console.log('valore di sess '+skConnEvent.sess);
   var skDemoReplies=require("./skills/demo_quick_replies.js")(controller);
   var skLibretto=require("./skills/skill_libretto.js")(controller);
   var skHelp=require("./skills/skill_help.js")(controller);
@@ -48,6 +57,7 @@ var webserver = require('./server.js')(controller);
     console.log('<----------------- A conversation ended with ', convo.context.user + " message " + convo.message);
     
   });
+ 
 // Wildcard hears response, will respond to all user input with 'Hello World!'
 controller.hears(['hello world'], 'message_received', function(bot,message) {
 
@@ -55,14 +65,17 @@ controller.hears(['hello world'], 'message_received', function(bot,message) {
 
   bot.startConversation(message, function(err,convo) {
     convo.setVar('foo','bar');
-    console.log('The value of foo is {{vars.foo}}');
-    
-    convo.ask('How are you? {{responses.foo}} '); //{{vars.foo}} 
+   // console.log('The value of foo is {{vars.foo}}');
+
+    convo.ask('How are you? {{vars.foo}} '); //{{vars.foo}} 
+    //convo.ask('scelta  {{responses.scelta}} origine {{origin}} ');
  });
   });   
-controller.hears('porco', 'message_received', function(bot, message) { //'(.*)'
-  console.log('sono qui in porco...')
-bot.reply(message, 'dio ');
+controller.hears('pippo', 'message_received', function(bot, message) { //'(.*)'
+  console.log('sono qui ')
+
+  bot.reply(message, 'scelta  {{responses.scelta}} origine {{origin}}');
+
 });
 /*controller.hears('(.*)', 'message_received', function(bot, message) { //'(.*)'
   bot.reply(message, 'ciao' );
@@ -71,18 +84,22 @@ bot.reply(message, 'dio ');
 */
 /********************** DIALOGFLOW INTENT */
 controller.hears(['Default Welcome Intent'], 'message_received', dialogflowMiddleware.hears, function(bot, message) {
+  setSessione('scelta','welcome');
+  setSessione('intent_name','Default Welcome Intent');
   var replyText = message.fulfillment.text;  // message object has new fields added by Dialogflow
   
   bot.reply(message, replyText);
 });
 controller.hears(['Libretto'], 'message_received', dialogflowMiddleware.hears, function(bot, message) {
   //console.log('valore di message '+ JSON.stringify(message));
+  setSessione('scelta','getLibretto');
+  setSessione('intent_name','Libretto');
   var replyText='';
   bot.startConversation(message, function(err, convo) {
  //bot.createConversation(message, (err, convo) => {
   
   // DEFINISCO I THREAD
-  convo.addMessage({ text:' add  nel thread del libretto ' }, 'default'); //default
+  convo.addMessage({ text:'sei nella sezione del libretto ' }, 'default'); //default
  
  
   //convo.activate();// -> con start conversation non serve più activate!!
@@ -91,44 +108,58 @@ controller.hears(['Libretto'], 'message_received', dialogflowMiddleware.hears, f
 convo.on('end', function (convo) {
   
   console.log('here in end_____________________');
-  if (message.entities.libretto){
+  if (message.entities.libretto && controller.session.matId){
     console.log('sono dentro if message.entities');
-    ctrlEsseTre.getLibretto().then((libretto)=> {
+    ctrlEsseTre.getLibretto(controller.session.matId).then((libretto)=> {
         replyText+='**************** ecco il tuo libretto ****************** \n';
         if (Array.isArray(libretto)){
-        
+        var arQr=[]; // array che contiene i dati del quick replies
+      
           for(var i=0; i<libretto.length; i++){
-  
+            var qr={ title:'', payload:''};
+
             replyText+=   libretto[i].adDes+ ', frequentato  nell \'anno ' +libretto[i].aaFreqId +', anno di corso ' +
             libretto[i].annoCorso + '\n ' ;
+
+            qr.title=libretto[i].adDes ; //adsceId
+            qr.payload=libretto[i].adsceId.toString();
+            if (typeof arQr!=="undefined"){
+              arQr.push(qr);
             }
+           
+            controller.session.cdsId=libretto[i].chiaveADContestualizzata.cdsId;   // setto dati del corso sulle variabili di session 10094 uguale per tutti
+           //salvo gli adsceId nelle variabili di sessione?? e se metto i quick replies??
+            }
+         
+            console.log('cdsId '+controller.session.cdsId);
             replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
-            bot.reply(message, replyText);  
-          
-         }
+
+          //  bot.reply(message, replyText);  
+            bot.reply(message, {
+              text: 'Questi gli esami del tuo libretto',
+              quick_replies:arQr
+              },function() {});
+          }// chiudi if
         }); 
-    }  
+      }  //chiudi controllo sessione 
 
  
-    
-});
-//}
-
-//});
-
-});
-
+     });
+  });
 });
 
 //anagrafica doLogin
 controller.hears(['getStudente'], 'message_received', dialogflowMiddleware.hears, function(bot, message) {
   //console.log('valore di message '+ JSON.stringify(message));
+  setSessione('scelta','getStudente');
+  setSessione('intent_name','getStudente');
   var replyText='';
   bot.startConversation(message, function(err, convo) {
  //bot.createConversation(message, (err, convo) => {
   
   // DEFINISCO I THREAD
-  convo.addMessage({ text:' qui sono in anagrafica ' }, 'default'); //default
+  
+  convo.addMessage({ text:' sei nella sezione anagrafica studente' }, 'default'); //default
  
  
   //convo.activate();// -> con start conversation non serve più activate!!
@@ -137,6 +168,7 @@ controller.hears(['getStudente'], 'message_received', dialogflowMiddleware.hears
 convo.on('end', function (convo) {
   
   console.log('here in end_____________________');
+  /* COMMENTATO IN DATA MODIFICA DEL 03/02/2019*/
  // if (message.entities.libretto){
     console.log('mi connetto a essetre ');
     ctrlEsseTre.doLogin().then((studente)=> {
@@ -144,29 +176,31 @@ convo.on('end', function (convo) {
         
         replyText+='codice fiscale '+ studente.codFisc + ' matricola ID '+ studente.trattiCarriera[0].matId + ' corso di laurea '+ studente.trattiCarriera[0].cdsDes ;
         replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
-         bot.reply(message, replyText); 
+        bot.reply(message, replyText); 
+       
         console.log('ho lo studente '+studente.codFisc + 'matricola ID '+ studente.trattiCarriera[0].matId);
         }); 
     //}  
-
- 
     
-});
-
-
-});
-
+    });
+  });
 });
 
 //getCarriera
 controller.hears(['getCarriera'], 'message_received', dialogflowMiddleware.hears, function(bot, message) {
   //console.log('valore di message '+ JSON.stringify(message));
+ /* controller.session.intent_name='getCarriera';*/
+  //controller.session.scelta.push('carriera');
+  setSessione('scelta','carriera');
+  setSessione('intent_name','getCarriera');
+  //console.log('provo ' +controller.session['intent_name']);
+
   var replyText='';
   bot.startConversation(message, function(err, convo) {
  //bot.createConversation(message, (err, convo) => {
   
   // DEFINISCO I THREAD
-  convo.addMessage({ text:' qui sono in carriera ' }, 'default'); //default
+  convo.addMessage({ text:'sei nella sezione deòòa carriera ' }, 'default'); //default
  
  
   //convo.activate();// -> con start conversation non serve più activate!!
@@ -175,9 +209,10 @@ controller.hears(['getCarriera'], 'message_received', dialogflowMiddleware.hears
 convo.on('end', function (convo) {
   
   console.log('here in end_____________________');
- // if (message.entities.libretto){
-    console.log('mi connetto a essetre per carriera');
-    ctrlEsseTre.getCarriera('s260856').then((carriera)=> {
+  if (controller.session.userId){
+    console.log('mi connetto a essetre per carriera'); //'s260856'
+   //*********** QUI USO LA VARIABILE DI SESSIONE */ 
+    ctrlEsseTre.getCarriera(controller.session.userId).then((carriera)=> {
         replyText+='**************** dati della CARRIERA ****************** \n';
         
         replyText+='anno immatricolazione  '+ carriera.aaId + ' numero matricola  '+ carriera.matricola + ' corso di laurea '+ carriera.cdsDes +', tipoCorsoDes '+ carriera.tipoCorsoDes ;
@@ -186,40 +221,40 @@ convo.on('end', function (convo) {
         replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
          bot.reply(message, replyText); 
         console.log('ho la carriera di '+carriera.matricola);
+       // controller.session.scelta= controller.session.scelta+','+'carriera';
+     
         }); 
-    //}  
-
- 
-    
+    }  
+  });
+ });
 });
-
-
-});
-
-});
-//getSingoloEsame
+//getSingoloEsame-> corso
 controller.hears(['getSingoloEsame'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
-
+  
+  setSessione('scelta','SingoloEsame');
+  setSessione('intent_name','getSingoloEsame');
   var replyText = '';
   bot.startConversation(message, function (err, convo) {
 
-    convo.addMessage({ text: ' qui ho sentito il nome di un esame ' }, 'default'); //default
+    convo.addMessage({ text: 'sei nel dettaglio di un corso ' }, 'default');
 
 
     convo.on('end', function (convo) {
 
       console.log('here in end_____________________');
-      // if (message.entities.libretto){
-      console.log('mi connetto a essetre per SINGOLO ESAME');
-      ctrlEsseTre.getEsame('286879','5057980').then((esame) => { //'286879','5057980'
-        replyText += '**************** dati del SINGOLO ESAME ****************** \n';
+       if (controller.session.matId){
+        console.log('mi connetto a essetre per SINGOLO ESAME');
+        ctrlEsseTre.getEsame(controller.session.matId,'5057980').then((esame) => { //'286879','5057980'
+          replyText += '**************** dati del SINGOLO ESAME ****************** \n';
 
-        replyText += 'esame di ' + esame.adDes +', anno  ' + esame.aaFreqId + 'adsceId ' + esame.adsceId + ' data frequenza ' + esame.dataFreq ;//+ ', esito ' + esame.esito.dataEsa;
+          replyText += 'esame di ' + esame.adDes +', anno  ' + esame.aaFreqId + 'adsceId ' + esame.adsceId + ' data frequenza ' + esame.dataFreq ;//+ ', esito ' + esame.esito.dataEsa;
 
-        replyText += '\n ' + myConvo.botQuestions.questMenuGenerico;
-        bot.reply(message, replyText);
-       // console.log('ho la singolo esame di ' + esame.adDes);
-      });
+          replyText += '\n ' + myConvo.botQuestions.questMenuGenerico;
+          bot.reply(message, replyText);
+      
+      
+        });
+      } //fine if 
     });
 
   });
@@ -390,3 +425,12 @@ controller.hears('Eliminare appello prenotato', 'message_received', function(bot
 
   });*/
 })
+function setSessione(chiave, valore){
+  if (chiave==='scelta' || chiave==='adsceId' || chiave ==='adId'){
+    controller.session.scelta.push(valore);
+  }else {
+    
+    controller.session[chiave]=valore;
+
+  }
+}
