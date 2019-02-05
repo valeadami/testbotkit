@@ -1,14 +1,16 @@
-function Sessione(user, login, persId, userId, cdsId,matId, stuId,appId, adsceId, intent_name, scelta) {
+function Sessione(user, login, persId, userId, cdsId,matId, stuId,appId, adsceId,adId, intent_name, scelta) {
     this.user=user //user che prendo dal message ad esempio 1d20e05a-dbc7-2d4d-e642-02cb7e22c22a
     this.login = login; //boolean se ha fatto login a EsseTre
     this.persId=persId; //da EsseTre
     this.userId=userId;  //da EsseTre
     //interi
-    this.cdsId=cdsId; //da EsseTre per libretto-
+    this.cdsId=cdsId; //da EsseTre per libretto->10094
     this.matId=matId; //da EsseTre
     this.stuId=stuId; //da EsseTre
-    this.appId=appId; //da EsseTre
+    this.appId=appId; //da EsseTre 5 
     this.adsceId=adsceId; //per libretto-> singolo esame
+    //aggiunta in  data 05/02/2019
+    this.adId=adId; //dal libretto e per prenotazione
     //array di stringhe
     this.intent_name=intent_name; //mi serve per sapere quale intent DF è stato attivato
     this.scelta=scelta; //le stringhe delle scelte delle quick reply
@@ -22,7 +24,7 @@ function Sessione(user, login, persId, userId, cdsId,matId, stuId,appId, adsceId
 
 
             console.log('CREATO OGGETTO SESSIONE: user=' + this.user + ', login ' + this.login +', persId  ' + this.persId + ', userId  ' + this.userId + ', cdsId' + this.cdsId + ', matricola id ' 
-                + this.matId + ', stuId '+ this.stuId + ',  appId '+ this.appId+ ', adsceId '+ this.adsceId +', intent name '+this.intent_name + ', scelta '+ this.scelta);
+                + this.matId + ', stuId '+ this.stuId + ',  appId '+ this.appId + 'addId ' +this.adId+ ', adsceId '+ this.adsceId +', intent name '+this.intent_name + ', scelta '+ this.scelta);
         } else {
 
             console.log('CREATO OGGETTO SESSIONE');
