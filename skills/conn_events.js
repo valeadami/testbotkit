@@ -9,7 +9,7 @@ module.exports = function(controller) {
 
     // if (process.env.studio_token) {
        controller.on('hello', function(bot, message) {
-         //  console.log('VALORE DI CONTROLLER.SESSION' +controller.session.prova);
+      
 
         bot.reply(message,'benvenuto welcome back, sono il bot dell\' università di Trieste');
         bot.startConversation(message, function(err,convo) {
@@ -107,7 +107,7 @@ module.exports = function(controller) {
 });
  
        controller.on('welcome_back', function(bot, message) {
-          // console.log('VALORE DI CONTROLLER.SESSION' +controller.session.prova);
+         
            bot.reply(message,'benvenuto welcome back, sono il bot dell\' università di Trieste');
            bot.startConversation(message, function(err,convo) {
     
@@ -207,9 +207,10 @@ module.exports = function(controller) {
            ctrlEsseTre.doLogin().then((studente)=> {
              
             console.log('::::::::::::::: ho lo studente '+studente.codFisc + ' matricola ID '+ studente.trattiCarriera[0].matId + ' persID'+ studente.persId + 'username '+ studente.userId + 'cdsID '+ studente.trattiCarriera[0].cdsId);
-            sess=new sessione(message.user,true,studente.persId,studente.userId,studente.trattiCarriera[0].cdsId, studente.trattiCarriera[0].matId,studente.stuId,null,null,null,'login');
+            sess=new sessione(message.user,true,studente.persId,studente.userId,studente.trattiCarriera[0].cdsId,studente.trattiCarriera[0].matId,studente.stuId,null,null,null,null,['login']);
            // convo.setVar('mySession', sess);
            controller.session=sess;
+          
 
             }); 
 
@@ -248,12 +249,12 @@ module.exports = function(controller) {
         // quando chiudi il browser
          console.log('§§§§§§§§§§§§§§§§ AL CLOSE' + sess.user);
          controller.trigger('disconnected', bot);
-         controller.session.prova='';
+         controller.session=null;
         });
         controller.on('disconnected', function(bot, message) {
        
          console.log('§§§§§§§§§§§§§§§§ MI SONO DISCONNESSO ' + sess.user);
-         controller.session.prova='';
+         controller.session=null;
 
     });
      }
