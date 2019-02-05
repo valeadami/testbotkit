@@ -48,7 +48,7 @@ module.exports = function(controller) {
          ], { 'key': 'scelta' }, 'default');
         
        //MENU LOGIN
-       convo.addQuestion({ text: myConvo.botQuestions.questUsername }, [
+       convo.addQuestion({ text: myConvo.botQuestions.questPrenUsername }, [
          {
              pattern: 's[0-9]', //pattern
              callback: function (response, convo) {
@@ -145,7 +145,7 @@ module.exports = function(controller) {
             ], { 'key': 'scelta' }, 'default');
            
           //MENU LOGIN
-          convo.addQuestion({ text: myConvo.botQuestions.questUsername }, [
+          convo.addQuestion({ text: myConvo.botQuestions.questPrenUsername }, [
             {
                 pattern: 's[0-9]', //pattern
                 callback: function (response, convo) {
@@ -173,7 +173,7 @@ module.exports = function(controller) {
                 {
                     pattern:'si',
                     callback: function(response, convo) {
-                        convo.say('Arrivederci! dal thread '); 
+                        convo.say('Arrivederci! dal thread ');
                         convo.next();
                      
                     }

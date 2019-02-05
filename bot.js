@@ -1,6 +1,5 @@
 var Botkit = require('botkit');
 var myConvo=require('./Conversation');
-
 //************************** gestione classi */
 var ctrlEsseTre=require('./Classi/clsControllerS3.js');
 var studente=require('./Classi/clsStudente.js');
@@ -40,6 +39,7 @@ var webserver = require('./server.js')(controller);
   var skStop=require("./skills/skill_stop.js")(controller);
   var skAnagrafica=require("./skills/skill_anagrafica.js")(controller);
   var skACarriera=require("./skills/skill_carriera.js")(controller);
+  var skAppelliPrenotabili=require("./skills/skill_prenotazione.js")(controller);
   //********fine 18/01/2019 */
   controller.on('conversationStarted', function(bot, convo) {
     console.log('----------------> A conversation started with ', convo.context.user);
@@ -83,93 +83,119 @@ controller.hears(['Libretto'], 'message_received', dialogflowMiddleware.hears, f
   
   // DEFINISCO I THREAD
   convo.addMessage({ text:' add  nel thread del libretto ' }, 'default'); //default
+ 
+ 
+  //convo.activate();// -> con start conversation non serve più activate!!
+  //});
 
-
-    convo.on('end', function (convo) {
-
-      console.log('here in end_____________________');
-      if (message.entities.libretto) {
-        console.log('sono dentro if message.entities');
-        ctrlEsseTre.getLibretto().then((libretto) => {
-          replyText += '**************** ecco il tuo libretto ****************** \n';
-          if (Array.isArray(libretto)) {
-
-            for (var i = 0; i < libretto.length; i++) {
-            /* versione 1: dura 1 minuto */
-              /*replyText += libretto[i].adDes + ', frequentato  nell \'anno ' + libretto[i].aaFreqId + ', anno di corso ' +
-                libretto[i].annoCorso + '\n ';*/
-                /*  versione 2: metto i quick replies e aggiungo intent getEsame*/
-                replyText += libretto[i].adDes + '\n ';
-
+convo.on('end', function (convo) {
+  
+  console.log('here in end_____________________');
+  if (message.entities.libretto){
+    console.log('sono dentro if message.entities');
+    ctrlEsseTre.getLibretto().then((libretto)=> {
+        replyText+='**************** ecco il tuo libretto ****************** \n';
+        if (Array.isArray(libretto)){
+        
+          for(var i=0; i<libretto.length; i++){
+  
+            replyText+=   libretto[i].adDes+ ', frequentato  nell \'anno ' +libretto[i].aaFreqId +', anno di corso ' +
+            libretto[i].annoCorso + '\n ' ;
             }
-            replyText += '\n ' + myConvo.botQuestions.questMenuGenerico;
-            //qui comporre il testo di output
-            bot.reply(message, replyText);
+            replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
+            bot.reply(message, replyText);  
+          
+         }
+        }); 
+    }  
 
-          }
-        });
-      }
-    });
-  });
+ 
+    
+});
+//}
+
+//});
+
+});
+
 });
 
 //anagrafica doLogin
-controller.hears(['getStudente'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+controller.hears(['getStudente'], 'message_received', dialogflowMiddleware.hears, function(bot, message) {
   //console.log('valore di message '+ JSON.stringify(message));
-  var replyText = '';
-  bot.startConversation(message, function (err, convo) {
-    //bot.createConversation(message, (err, convo) => {
+  var replyText='';
+  bot.startConversation(message, function(err, convo) {
+ //bot.createConversation(message, (err, convo) => {
+  
+  // DEFINISCO I THREAD
+  convo.addMessage({ text:' qui sono in anagrafica ' }, 'default'); //default
+ 
+ 
+  //convo.activate();// -> con start conversation non serve più activate!!
+  //});
 
-    // DEFINISCO I THREAD
-    convo.addMessage({ text: ' qui sono in anagrafica ' }, 'default'); //default
+convo.on('end', function (convo) {
+  
+  console.log('here in end_____________________');
+ // if (message.entities.libretto){
+    console.log('mi connetto a essetre ');
+    ctrlEsseTre.doLogin().then((studente)=> {
+        replyText+='**************** dati dello STUDENTE ****************** \n';
+        
+        replyText+='codice fiscale '+ studente.codFisc + ' matricola ID '+ studente.trattiCarriera[0].matId + ' corso di laurea '+ studente.trattiCarriera[0].cdsDes ;
+        replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
+         bot.reply(message, replyText); 
+        console.log('ho lo studente '+studente.codFisc + 'matricola ID '+ studente.trattiCarriera[0].matId);
+        }); 
+    //}  
+
+ 
+    
+});
 
 
-    //convo.activate();// -> con start conversation non serve più activate!!
-    //});
+});
 
-    convo.on('end', function (convo) {
-
-      console.log('here in end_____________________');
-      // if (message.entities.libretto){
-      console.log('mi connetto a essetre ');
-      ctrlEsseTre.doLogin().then((studente) => {
-        replyText += '**************** dati dello STUDENTE ****************** \n';
-
-        replyText += 'codice fiscale ' + studente.codFisc + ' matricola ID ' + studente.trattiCarriera[0].matId + ' corso di laurea ' + studente.trattiCarriera[0].cdsDes;
-        replyText += '\n ' + myConvo.botQuestions.questMenuGenerico;
-        bot.reply(message, replyText);
-        console.log('ho lo studente ' + studente.codFisc + 'matricola ID ' + studente.trattiCarriera[0].matId);
-      });  
-    });
-  });
 });
 
 //getCarriera
-controller.hears(['getCarriera'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+controller.hears(['getCarriera'], 'message_received', dialogflowMiddleware.hears, function(bot, message) {
+  //console.log('valore di message '+ JSON.stringify(message));
+  var replyText='';
+  bot.startConversation(message, function(err, convo) {
+ //bot.createConversation(message, (err, convo) => {
+  
+  // DEFINISCO I THREAD
+  convo.addMessage({ text:' qui sono in carriera ' }, 'default'); //default
+ 
+ 
+  //convo.activate();// -> con start conversation non serve più activate!!
+  //});
 
-  var replyText = '';
-  bot.startConversation(message, function (err, convo) {
+convo.on('end', function (convo) {
+  
+  console.log('here in end_____________________');
+ // if (message.entities.libretto){
+    console.log('mi connetto a essetre per carriera');
+    ctrlEsseTre.getCarriera('s260856').then((carriera)=> {
+        replyText+='**************** dati della CARRIERA ****************** \n';
+        
+        replyText+='anno immatricolazione  '+ carriera.aaId + ' numero matricola  '+ carriera.matricola + ' corso di laurea '+ carriera.cdsDes +', tipoCorsoDes '+ carriera.tipoCorsoDes ;
+       
+        
+        replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
+         bot.reply(message, replyText); 
+        console.log('ho la carriera di '+carriera.matricola);
+        }); 
+    //}  
 
-    convo.addMessage({ text: ' qui sono in carriera ' }, 'default'); //default
+ 
+    
+});
 
 
-    convo.on('end', function (convo) {
+});
 
-      console.log('here in end_____________________');
-      // if (message.entities.libretto){
-      console.log('mi connetto a essetre per carriera');
-      ctrlEsseTre.getCarriera('s260856').then((carriera) => {
-        replyText += '**************** dati della CARRIERA ****************** \n';
-
-        replyText += 'anno immatricolazione  ' + carriera.aaId + ' numero matricola  ' + carriera.matricola + ' corso di laurea ' + carriera.cdsDes + ', tipo di corso ' + carriera.tipoCorsoDes;
-
-        replyText += '\n ' + myConvo.botQuestions.questMenuGenerico;
-        bot.reply(message, replyText);
-        console.log('ho la carriera di ' + carriera.matricola);
-      });
-    });
-
-  });
 });
 //getSingoloEsame
 controller.hears(['getSingoloEsame'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
@@ -197,4 +223,170 @@ controller.hears(['getSingoloEsame'], 'message_received', dialogflowMiddleware.h
     });
 
   });
-});
+})
+
+//getAppelliPrenotabili: non serve intent qui...??
+controller.hears('Appelli prenotabili', 'message_received', function(bot, message) {
+
+  var replyText = '';
+  bot.startConversation(message, function (err, convo) {
+
+    convo.addMessage({ text: ' questi sono gli appelli prenotabili' }, 'default'); //default
+
+
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+      // if (message.entities.libretto){
+      console.log('mi connetto a essetre per ELENCO ESAMI PRENOTABILI ');
+      ctrlEsseTre.getPrenotazioni('286879').then((prenotazioni) => { 
+       
+        if (Array.isArray(prenotazioni)){
+        
+          for(var i=0; i<prenotazioni.length; i++){
+  
+            replyText+=   prenotazioni[i].adDes+ '\n ' ;
+            }
+            replyText+='\n Quale appello vuoi prenotare ora?';
+            bot.reply(message, replyText);  
+          
+         }
+      
+      });
+    });
+
+  });
+})
+// ottieni elenco appelli prenotati
+controller.hears('Appelli prenotati', 'message_received', function(bot, message) {
+
+  var replyText = '';
+  bot.startConversation(message, function (err, convo) {
+
+    convo.addMessage({ text: ' questi sono gli appelli prenotati' }, 'default'); //default
+
+
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+      // if (message.entities.libretto){
+      console.log('mi connetto a essetre per ELENCO ESAMI PRENOTATI ');
+      ctrlEsseTre.getPrenotati('286879').then((prenotazioni) => { 
+       
+        if (Array.isArray(prenotazioni)){
+        
+          for(var i=0; i<prenotazioni.length; i++){
+  
+            replyText+=   prenotazioni[i].adDes+ '\n ' ;
+            }
+            replyText+='\n Cosa vuoi fare ora?';
+            bot.reply(message, replyText);  
+          
+         }
+      
+      });
+    });
+
+  });
+})
+//POST PRENOTAZIONE
+controller.hears(['prenotazione'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+  
+  var replyText = '';
+  bot.startConversation(message, function (err, convo) {
+  
+    convo.addMessage({ text: ' queste sono le date disponibili per appello selezionato ' }, 'default'); //default
+    ctrlEsseTre.getAppelloDaPrenotare(10094,117740).then((appelliDaPrenotare) => { //'286879','5057980'
+    replyText += '**************** dati del SINGOLO APPELLO  ****************** \n';
+    if (Array.isArray(appelliDaPrenotare)) {
+      for(var i=0; i<appelliDaPrenotare.length; i++){
+        replyText += ' data appello  ' + appelliDaPrenotare[i].dataInizioApp;//+ ', esito ' + esame.esito.dataEsa;
+      }
+    }
+    replyText += '\n' + message.fulfillment.text; //ok procedo confermi? da DF
+    bot.reply(message, replyText);
+
+   
+  
+    });
+    
+   
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+       
+    });
+
+  });
+})
+//hears confermo...parte il post
+
+//POST PRENOTAZIONE
+controller.hears(['prenotazione - yes'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+  console.log('********* PRENOTAZIONE YES HERE*********');
+  //console.log(JSON.stringify(message));
+  var replyText = message.fulfillment.text;
+  bot.reply(message, replyText);
+  //faccio il post
+  ctrlEsseTre.postSingoloAppelloDaPrenotare(10094,117740,5,5057981).then((res)=>{
+    if (res){
+
+      console.log('ok con la prenotazione dal bot.js');
+      bot.reply(message,' OK DONE');
+    } else {
+      console.log('Nok con la prenotazione dal bot.js');
+      bot.reply(message,' SCUSA HO UN ERRORE');
+    }
+
+  });
+  
+ 
+ 
+})
+//ELIMINARE LA PRENOTAZIONE
+controller.hears('Eliminare appello prenotato', 'message_received', function(bot, message) {
+
+  var replyText = '';
+  bot.reply(message, 'ok procedo con cancellare la prenotazione...');
+  //deleteSingoloAppelloDaPrenotare
+  ctrlEsseTre.deleteSingoloAppelloDaPrenotare(10094,117740,5,236437).then((res)=>{
+    if (res){
+
+      console.log('ok con cancellazione dal bot.js');
+      bot.reply(message,' OK CANCELLATO PRENOTAZIONE');
+    } else {
+      console.log('Nok con la prenotazione dal bot.js');
+      bot.reply(message,' SCUSA HO UN ERRORE CANCALLANDO LA PRENOTAZIONE');
+    }
+
+  });
+  
+  /*
+  bot.startConversation(message, function (err, convo) {
+
+    convo.addMessage({ text: ' queste sono gle prenotazioni che hai fatto' }, 'default'); //default
+
+
+    convo.on('end', function (convo) {
+
+      console.log('here in end_____________________');
+      // if (message.entities.libretto){
+      console.log('mi connetto a essetre per ELENCO ESAMI PRENOTABILI ');
+      ctrlEsseTre.getPrenotazioni('286879').then((prenotazioni) => { 
+       
+        if (Array.isArray(prenotazioni)){
+        
+          for(var i=0; i<prenotazioni.length; i++){
+  
+            replyText+=   prenotazioni[i].adDes+ '\n ' ;
+            }
+            replyText+='\n Quale appello vuoi prenotare ora?';
+            bot.reply(message, replyText);  
+          
+         }
+      
+      });
+    });
+
+  });*/
+})
