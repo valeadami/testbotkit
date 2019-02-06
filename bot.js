@@ -200,7 +200,7 @@ controller.hears(['getCarriera'], 'message_received', dialogflowMiddleware.hears
  //bot.createConversation(message, (err, convo) => {
   
   // DEFINISCO I THREAD
-  convo.addMessage({ text:'sei nella sezione deòòa carriera ' }, 'default'); //default
+  convo.addMessage({ text:'sei nella sezione della carriera ' }, 'default'); //default
  
  
   //convo.activate();// -> con start conversation non serve più activate!!
@@ -218,7 +218,7 @@ convo.on('end', function (convo) {
         replyText+='anno immatricolazione  '+ carriera.aaId + ' numero matricola  '+ carriera.matricola + ' corso di laurea '+ carriera.cdsDes +', tipoCorsoDes '+ carriera.tipoCorsoDes ;
        
         
-        replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
+        replyText+='\n'+myConvo.botQuestions.questMenuGenerico;
          bot.reply(message, replyText); 
         console.log('ho la carriera di '+carriera.matricola);
        // controller.session.scelta= controller.session.scelta+','+'carriera';
@@ -262,7 +262,8 @@ controller.hears(['getSingoloEsame'], 'message_received', dialogflowMiddleware.h
 
 //getAppelliPrenotabili: non serve intent qui...??
 controller.hears('Appelli prenotabili', 'message_received', function(bot, message) {
-
+  setSessione('scelta','Appelli prenotabili');
+  setSessione('intent_name','Appelli prenotabili');
   var replyText = '';
   bot.startConversation(message, function (err, convo) {
 
@@ -272,9 +273,9 @@ controller.hears('Appelli prenotabili', 'message_received', function(bot, messag
     convo.on('end', function (convo) {
 
       console.log('here in end_____________________');
-      // if (message.entities.libretto){
+      if (controller.session.matId){
       console.log('mi connetto a essetre per ELENCO ESAMI PRENOTABILI ');
-      ctrlEsseTre.getPrenotazioni('286879').then((prenotazioni) => { 
+      ctrlEsseTre.getPrenotazioni(controller.session.matId).then((prenotazioni) => { 
        
         if (Array.isArray(prenotazioni)){
         
@@ -288,13 +289,15 @@ controller.hears('Appelli prenotabili', 'message_received', function(bot, messag
          }
       
       });
+    }//fine if session
     });
-
+  
   });
 })
 // ottieni elenco appelli prenotati
 controller.hears('Appelli prenotati', 'message_received', function(bot, message) {
-
+  setSessione('scelta','Appelli prenotati');
+  setSessione('intent_name','Appelli prenotati');
   var replyText = '';
   bot.startConversation(message, function (err, convo) {
 
@@ -304,47 +307,49 @@ controller.hears('Appelli prenotati', 'message_received', function(bot, message)
     convo.on('end', function (convo) {
 
       console.log('here in end_____________________');
-      // if (message.entities.libretto){
+     if (controller.session.matId){
       console.log('mi connetto a essetre per ELENCO ESAMI PRENOTATI ');
-      ctrlEsseTre.getPrenotati('286879').then((prenotazioni) => { 
+      ctrlEsseTre.getPrenotati(controller.session.matId).then((prenotazioni) => { 
        
         if (Array.isArray(prenotazioni)){
         
           for(var i=0; i<prenotazioni.length; i++){
   
-            replyText+=   prenotazioni[i].adDes+ '\n ' ;
+            replyText+= prenotazioni[i].adDes+ '\n ' ;
             }
             replyText+='\n Cosa vuoi fare ora?';
             bot.reply(message, replyText);  
           
          }
       
-      });
+      }); 
+    }//fine if sessione
     });
 
   });
 })
 //POST PRENOTAZIONE
 controller.hears(['prenotazione'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
-  
+  setSessione('scelta','prenotazione');
+  setSessione('intent_name','prenotazione');
   var replyText = '';
   bot.startConversation(message, function (err, convo) {
   
     convo.addMessage({ text: ' queste sono le date disponibili per appello selezionato ' }, 'default'); //default
-    ctrlEsseTre.getAppelloDaPrenotare(10094,117740).then((appelliDaPrenotare) => { //'286879','5057980'
-    replyText += '**************** dati del SINGOLO APPELLO  ****************** \n';
-    if (Array.isArray(appelliDaPrenotare)) {
-      for(var i=0; i<appelliDaPrenotare.length; i++){
-        replyText += ' data appello  ' + appelliDaPrenotare[i].dataInizioApp;//+ ', esito ' + esame.esito.dataEsa;
+    if (controller.session.cdsId){ //da aggiungere gli altri
+      ctrlEsseTre.getAppelloDaPrenotare(controller.session.cdsId,117740).then((appelliDaPrenotare) => { //'286879','5057980'
+      replyText += '**************** dati del SINGOLO APPELLO  ****************** \n';
+      if (Array.isArray(appelliDaPrenotare)) {
+        for(var i=0; i<appelliDaPrenotare.length; i++){
+          replyText += ' data appello  ' + appelliDaPrenotare[i].dataInizioApp;//+ ', esito ' + esame.esito.dataEsa;
+        }
       }
-    }
-    replyText += '\n' + message.fulfillment.text; //ok procedo confermi? da DF
-    bot.reply(message, replyText);
+      replyText += '\n' + message.fulfillment.text; //ok procedo confermi? da DF
+      bot.reply(message, replyText);
 
-   
-  
-    });
+      });
     
+    }//fine if session
    
     convo.on('end', function (convo) {
 
@@ -359,72 +364,63 @@ controller.hears(['prenotazione'], 'message_received', dialogflowMiddleware.hear
 //POST PRENOTAZIONE
 controller.hears(['prenotazione - yes'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
   console.log('********* PRENOTAZIONE YES HERE*********');
+  setSessione('scelta','prenotazione_yes');
+  setSessione('intent_name','prenotazione_yes');
   //console.log(JSON.stringify(message));
   var replyText = message.fulfillment.text;
   bot.reply(message, replyText);
+
   //faccio il post
-  ctrlEsseTre.postSingoloAppelloDaPrenotare(10094,117740,5,5057981).then((res)=>{
-    if (res){
+  if (controller.session.cdsId){
+      ctrlEsseTre.postSingoloAppelloDaPrenotare(controller.session.cdsId,117740,5,5057981).then((res)=>{
+        if (res){
 
-      console.log('ok con la prenotazione dal bot.js');
-      bot.reply(message,' OK DONE');
-    } else {
-      console.log('Nok con la prenotazione dal bot.js');
-      bot.reply(message,' SCUSA HO UN ERRORE');
-    }
+          console.log('ok con la prenotazione dal bot.js');
+          bot.reply(message,' PRENOTAZIONE EFFETTUATA CON SUCCESSO');
+        } else {
+          console.log('Nok con la prenotazione dal bot.js');
+          bot.reply(message,' SCUSA HO UN ERRORE');
+        }
 
-  });
+      });
   
+    }//fine if session
  
+})
+//PRENOTAZIONE NO
+//
+controller.hears(['prenotazione - no'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+  console.log('********* PRENOTAZIONE NO HERE*********');
+  setSessione('scelta','prenotazione_no');
+  setSessione('intent_name','prenotazione_no');
+  //console.log(JSON.stringify(message));
+ 
+  bot.reply(message, myConvo.botQuestions.questAnnulla +'\n'+myConvo.botQuestions.questMenuGenerico );
+
  
 })
 //ELIMINARE LA PRENOTAZIONE
 controller.hears('Eliminare appello prenotato', 'message_received', function(bot, message) {
-
+  setSessione('scelta','Eliminare appello prenotato');
+  setSessione('intent_name','Eliminare appello prenotato');
   var replyText = '';
   bot.reply(message, 'ok procedo con cancellare la prenotazione...');
   //deleteSingoloAppelloDaPrenotare
-  ctrlEsseTre.deleteSingoloAppelloDaPrenotare(10094,117740,5,236437).then((res)=>{
-    if (res){
+  if (controller.session.cdsId){
+    ctrlEsseTre.deleteSingoloAppelloDaPrenotare(controller.session.cdsId,117740,5,236437).then((res)=>{
+      if (res){
 
-      console.log('ok con cancellazione dal bot.js');
-      bot.reply(message,' OK CANCELLATO PRENOTAZIONE');
-    } else {
-      console.log('Nok con la prenotazione dal bot.js');
-      bot.reply(message,' SCUSA HO UN ERRORE CANCALLANDO LA PRENOTAZIONE');
-    }
+        console.log('ok con cancellazione dal bot.js');
+        bot.reply(message,' OK CANCELLATO PRENOTAZIONE');
+      } else {
+        console.log('Nok con la prenotazione dal bot.js');
+        bot.reply(message,' SCUSA HO UN ERRORE CANCALLANDO LA PRENOTAZIONE');
+      }
 
-  });
-  
-  /*
-  bot.startConversation(message, function (err, convo) {
-
-    convo.addMessage({ text: ' queste sono gle prenotazioni che hai fatto' }, 'default'); //default
-
-
-    convo.on('end', function (convo) {
-
-      console.log('here in end_____________________');
-      // if (message.entities.libretto){
-      console.log('mi connetto a essetre per ELENCO ESAMI PRENOTABILI ');
-      ctrlEsseTre.getPrenotazioni('286879').then((prenotazioni) => { 
-       
-        if (Array.isArray(prenotazioni)){
-        
-          for(var i=0; i<prenotazioni.length; i++){
-  
-            replyText+=   prenotazioni[i].adDes+ '\n ' ;
-            }
-            replyText+='\n Quale appello vuoi prenotare ora?';
-            bot.reply(message, replyText);  
-          
-         }
-      
-      });
     });
-
-  });*/
+  }//fine if
 })
+//05/02/2019
 function setSessione(chiave, valore){
   if (chiave==='scelta' || chiave==='adsceId' || chiave ==='adId'){
     controller.session.scelta.push(valore);
