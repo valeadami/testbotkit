@@ -387,6 +387,10 @@
         that.on('message', function(message) {
 
           that.renderMessage(message);
+          /*modifica del 07/02/2019 **/
+          var msg = new SpeechSynthesisUtterance(message.text);
+          var myText = msg;
+          window.speechSynthesis.speak(myText);
 
         });
 
@@ -473,7 +477,46 @@
           // this is a stand-alone client. connect immediately.
           that.connect(user);
         }
-
+        //********** */modifica del 07/02/2019
+        var recognition = new webkitSpeechRecognition();
+            var recognizedText = null;
+            recognition.continuous = false;
+            recognition.onstart = function() {
+              recognizedText = null;
+              console.log('RECOGNITION START');
+            };
+            recognition.onresult = function(ev) {
+              recognizedText = ev["results"][0][0]["transcript"];
+              const speech = recognizedText //'ciao dallo speech synthesis';
+              var msg = new SpeechSynthesisUtterance(speech);
+              window.speechSynthesis.speak(msg);
+              console.log('RECOGNITION OK');
+              //PROVO A STAMPARLI
+              //ok ma devo anche mettere il testo in input
+              that.input.value=speech;
+              //that.renderMessage(msg);
+            };
+            recognition.onerror = function(ev) {
+              console.log("Speech recognition error", ev);
+            };
+            recognition.onend = function() {
+              console.log('RECOGNITION ENDED');
+              const micListening = document.querySelector(".mic .listening");
+              const micReady = document.querySelector(".mic .ready");
+              micListening.style.display = "none";
+              micReady.style.display = "block";
+            };
+            const startButton = document.querySelector("#start");
+            startButton.addEventListener("click", function(ev) {
+              const micListening = document.querySelector(".mic .listening");
+              const micReady = document.querySelector(".mic .ready");
+            
+              micListening.style.display = "block";
+              micReady.style.display = "none";
+              recognition.start();
+              ev.preventDefault();
+            });
+            //suo 
         return that;
       }
     };
@@ -482,5 +525,11 @@
     (function() {
       // your page initialization code here
       // the DOM will be available here
+     /* const startButton = document.getElementById("start");
+      startButton.addEventListener("click", function(ev) {
+      alert('po');
+      
+      });*/
+      //originale
       Botkit.boot();
     })();

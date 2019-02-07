@@ -218,7 +218,7 @@ convo.on('end', function (convo) {
         replyText+='anno immatricolazione  '+ carriera.aaId + ' numero matricola  '+ carriera.matricola + ' corso di laurea '+ carriera.cdsDes +', tipoCorsoDes '+ carriera.tipoCorsoDes ;
        
         
-        replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
+        replyText+='\n'+myConvo.botQuestions.questMenuGenerico;
          bot.reply(message, replyText); 
         console.log('ho la carriera di '+carriera.matricola);
        // controller.session.scelta= controller.session.scelta+','+'carriera';
@@ -387,6 +387,18 @@ controller.hears(['prenotazione - yes'], 'message_received', dialogflowMiddlewar
     }//fine if session
  
 })
+//PRENOTAZIONE NO
+//
+controller.hears(['prenotazione - no'], 'message_received', dialogflowMiddleware.hears, function (bot, message) {
+  console.log('********* PRENOTAZIONE NO HERE*********');
+  setSessione('scelta','prenotazione_no');
+  setSessione('intent_name','prenotazione_no');
+  //console.log(JSON.stringify(message));
+ 
+  bot.reply(message, myConvo.botQuestions.questAnnulla +'\n'+myConvo.botQuestions.questMenuGenerico );
+
+ 
+})
 //ELIMINARE LA PRENOTAZIONE
 controller.hears('Eliminare appello prenotato', 'message_received', function(bot, message) {
   setSessione('scelta','Eliminare appello prenotato');
@@ -410,11 +422,16 @@ controller.hears('Eliminare appello prenotato', 'message_received', function(bot
 })
 //05/02/2019
 function setSessione(chiave, valore){
-  if (chiave==='scelta' || chiave==='adsceId' || chiave ==='adId'){
-    controller.session.scelta.push(valore);
-  }else {
+  if (typeof controller.session!=='undefined'){
     
-    controller.session[chiave]=valore;
-
+  
+    if (chiave==='scelta' || chiave==='adsceId' || chiave ==='adId'){
+      controller.session.scelta.push(valore);
+    }else {
+      
+      controller.session[chiave]=valore;
+  
+    }
   }
+ 
 }
