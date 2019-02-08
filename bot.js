@@ -174,7 +174,7 @@ convo.on('end', function (convo) {
     ctrlEsseTre.doLogin().then((studente)=> {
         replyText+='**************** dati dello STUDENTE ****************** \n';
         
-        replyText+='codice fiscale '+ studente.codFisc + ' matricola ID '+ studente.trattiCarriera[0].matId + ' corso di laurea '+ studente.trattiCarriera[0].cdsDes ;
+        replyText+='codice fiscale '+ studente.codFisc + ', matricola ID '+ studente.trattiCarriera[0].matId + ', corso di laurea '+ studente.trattiCarriera[0].cdsDes ;
         replyText+='\n '+myConvo.botQuestions.questMenuGenerico;
         bot.reply(message, replyText); 
        
@@ -215,7 +215,7 @@ convo.on('end', function (convo) {
     ctrlEsseTre.getCarriera(controller.session.userId).then((carriera)=> {
         replyText+='**************** dati della CARRIERA ****************** \n';
         
-        replyText+='anno immatricolazione  '+ carriera.aaId + ' numero matricola  '+ carriera.matricola + ' corso di laurea '+ carriera.cdsDes +', tipoCorsoDes '+ carriera.tipoCorsoDes ;
+        replyText+='anno immatricolazione  '+ carriera.aaId + ', numero matricola  '+ carriera.matricola + ', corso di laurea '+ carriera.cdsDes +', tipoCorsoDes '+ carriera.tipoCorsoDes ;
        
         
         replyText+='\n'+myConvo.botQuestions.questMenuGenerico;
@@ -422,11 +422,16 @@ controller.hears('Eliminare appello prenotato', 'message_received', function(bot
 })
 //05/02/2019
 function setSessione(chiave, valore){
-  if (chiave==='scelta' || chiave==='adsceId' || chiave ==='adId'){
-    controller.session.scelta.push(valore);
-  }else {
+  if (typeof controller.session!=='undefined'){
     
-    controller.session[chiave]=valore;
-
+  
+    if (chiave==='scelta' || chiave==='adsceId' || chiave ==='adId'){
+      controller.session.scelta.push(valore);
+    }else {
+      
+      controller.session[chiave]=valore;
+  
+    }
   }
+ 
 }

@@ -6,7 +6,7 @@ var Conversation={
 
         'respOnBoarding':'Ciao! Sono il bot dell’Università degli studi di Trieste. Posso aiutarti a prenotare un appello, vedere il tuo libretto, vedere i risultati di un esame. Per connetterti a essetre ho bisogno delle tue credenziali',
         'respLogin':'Per connetterti a essetre ho bisogno delle tue credenziali. In generale, la username è nel formato s260856',
-        'respMenu':' dì o digita ANAGRAFICA per anagrafica studente, CARRIERA per informazioni generali sul tuo corso, LIBRETTO per conoscere la tua carriera, PRENOTAZIONE per prenotare appello, HELP per ricevere aiuto, STOP per terminare la conversazione',
+        'respMenu':'dì o digita ANAGRAFICA per anagrafica studente, CARRIERA per informazioni generali sul tuo corso, LIBRETTO per conoscere la tua carriera, PRENOTAZIONE per prenotare appello', //, HELP per ricevere aiuto, STOP per terminare la conversazione'
         'respHelp':'sono qui per aiutarti',
         'respGuida':'Bene, hai chiesto aiuto! Puoi darmi istruzione via chat o in modalità vocale. Ascolto le tue parole, quindi se vuoi continuare dimmi o scrivi prenotazione, libretto o esito. Per uscire dalla chat dì stop, per annullare un\'operazione dì annulla'
     },
